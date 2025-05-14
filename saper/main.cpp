@@ -22,9 +22,11 @@ class Board{
         int mines;
         Board(int rows, int columns);
         void showBoard();
-        int chooseField(int w);
+        int chooseField(int w, bool firstClick);
         void showEmptyFields(int x, int y);
         int checkUncovered();
+        int flags;
+        void setMines(int fcc, int fcr);
 };
 
 Field::Field(){
@@ -35,6 +37,7 @@ Field::Field(){
 };
 
 Board::Board(int r, int c){
+    flags = 0;
     rows = r;
     columns = c;
     board = new Field*[rows]; // tablica wskaźników, która ma rows elementów
@@ -42,13 +45,16 @@ Board::Board(int r, int c){
         board[i] = new Field[columns];
         
     }
+    mines = 0;
+}
+
+void Board::setMines(int fcc, int fcr){
     int losowyx;
     int losowyy;
     srand(time(NULL));
-    mines = 0;
-    switch(rows){
+    switch(this->rows){
         case 8:
-            mines = 10;
+            this->mines = 10;
             break;
         case 16:
             mines = 40;
@@ -58,10 +64,30 @@ Board::Board(int r, int c){
         mines = (rows*(rows/5));
     }
     for(int w = 0; w<mines; w++){
-        losowyx = rand() % r;
-        losowyy = rand() % c;
-        board[losowyx][losowyy].type = "x";
-    }
+        losowyx = rand() % rows;
+		losowyy = rand() % columns;
+		bool ok = true;
+
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                int nx = fcr + dx;
+                int ny = fcc + dy;
+
+                if (nx >= 0 && nx < rows && ny >= 0 && ny < columns){
+                    if (losowyx == nx && losowyy == ny){
+                        ok = false;
+                    }
+                }
+            }
+        }
+
+        if (ok && board[losowyx][losowyy].type != "x") {
+            board[losowyx][losowyy].type = "x";
+        } else {
+            w--;
+        }
+
+	}
     int XD = 0;
     for(int i = 0;i<rows;++i){
         for(int j = 0;j<rows;++j){
@@ -77,7 +103,7 @@ Board::Board(int r, int c){
                         }if(board[i][j+1].type == "x"){
                             XD++;
                         }
-                    } else if(j+1 == columns){
+                    } else if(j+1 == this->columns){
                        if(board[i+1][j].type == "x"){
                             XD++;
                         }
@@ -208,7 +234,6 @@ int Board::checkUncovered(){
 }
 
 void Board::showEmptyFields(int x, int y){
-    // if (this->board[x][y].type != " ") return;
 
     this->board[x][y].checked = true;
     this->board[x][y].hidden = false;
@@ -272,7 +297,7 @@ void Board::showBoard(){
     }
 }
 
-int Board::chooseField(int w){
+int Board::chooseField(int w, bool fc){
     int x = 0;
     int y = 0;
     char alfabet[25]{'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','W','X','Y','Z'}; 
@@ -284,6 +309,9 @@ int Board::chooseField(int w){
         cout << "Podaj litere pola" << endl;
         cin >> l;
         l = toupper(l);
+        if(!fc){
+            this->setMines(x, y);
+        }
         int size = sizeof(alfabet);
         for(int w = 0;w<size;w++){
             if(alfabet[w] == l){
@@ -300,8 +328,6 @@ int Board::chooseField(int w){
                 this->showEmptyFields(x, y);
             }
         }
-        
-
             if(this->board[x][y].type == "x"){
                 return 1;
             } else{
@@ -323,49 +349,64 @@ int Board::chooseField(int w){
         }
         if(this->board[x][y].marked == true){
             this->board[x][y].marked = false;
+            this->flags -= 1;
             if(this->board[x][y].type == "x"){
                 return -1;
             } else{
                 return 0;
             }
         }
-        else if(this->board[x][y].type == "x"){
+        else if(this->board[x][y].type == "x" && this->flags < 10){
             this->board[x][y].marked = true;
+            this->flags += 1;
             return 1;
         } 
-        else{
+        else if(this->flags < 10){
             this->board[x][y].marked = true;
+            this->flags += 1;
+            return 0;
+        }else{
             return 0;
         }
     }
-    
 }
 
 int main(){
+    int firstClickCol, firstClickRow;
+    bool firstClickCheck = false;
+    
     Board plansza1(8, 8);
     bool przegrana = false;
-    int wygrana = plansza1.mines;
-    cout << wygrana << endl;
+    int wygrana = 10;
     int potencjal = 0;
     int wybor = 0;
     while(!przegrana && wygrana != potencjal){
         plansza1.showBoard();
+
         cout << "\nWybierz akcję:\n1 - Sprawdź pole \n2 - Oznacz pole flagą" << endl;
         cin >> wybor;
+    
         if(wybor == 1){
-            przegrana = plansza1.chooseField(wybor);
-        } else{
-            plansza1.chooseField(wybor);
+            przegrana = plansza1.chooseField(wybor, firstClickCheck);
+        }else{
+            plansza1.chooseField(wybor, firstClickCheck);
             potencjal = plansza1.checkUncovered();
         }
+
+        if(firstClickCheck){
+            wygrana = plansza1.mines;
+            cout << wygrana << endl;
+            firstClickCheck = true;
+        }
+
+        cout << "pola zakryte: " << potencjal;
         if(wygrana == potencjal){
             cout << "wygrales" << endl;
         }
         if(przegrana){
             cout << "przegrales" << endl;
         }
-        
-    }
+    }    
     plansza1.showBoard();
     return  0;
 }
