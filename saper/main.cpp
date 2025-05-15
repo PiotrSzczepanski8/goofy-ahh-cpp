@@ -285,7 +285,7 @@ void Board::showBoard(){
                     cout << "■ ";
             }else{
                 if(board[i][j].type == "0"){
-                    cout << "□ ";  
+                    cout << "□ ";
                 } else if(board[i][j].type == "x"){
                     cout << "X ";
                 } else{
@@ -309,15 +309,16 @@ int Board::chooseField(int w, bool fc){
         cout << "Podaj litere pola" << endl;
         cin >> l;
         l = toupper(l);
-        if(!fc){
-            this->setMines(x, y);
-        }
         int size = sizeof(alfabet);
         for(int w = 0;w<size;w++){
             if(alfabet[w] == l){
                 y = w;
                 break;
             }
+        }
+        if(fc == false){
+            setMines(y, x);
+            cout << "miny rozstawione" << endl;
         }
         if(this->board[x][y].marked == true){
             return 0;
@@ -379,7 +380,7 @@ int main(){
     bool przegrana = false;
     int wygrana = 10;
     int potencjal = 0;
-    int wybor = 0;
+    int wybor;
     while(!przegrana && wygrana != potencjal){
         plansza1.showBoard();
 
@@ -388,15 +389,17 @@ int main(){
     
         if(wybor == 1){
             przegrana = plansza1.chooseField(wybor, firstClickCheck);
+            potencjal = plansza1.checkUncovered();
         }else{
             plansza1.chooseField(wybor, firstClickCheck);
             potencjal = plansza1.checkUncovered();
         }
-
-        if(firstClickCheck){
-            wygrana = plansza1.mines;
-            cout << wygrana << endl;
-            firstClickCheck = true;
+        if(wybor){
+            if(firstClickCheck == false){
+                wygrana = plansza1.mines;
+                cout << wygrana << endl;
+                firstClickCheck = true;
+            }
         }
 
         cout << "pola zakryte: " << potencjal;
