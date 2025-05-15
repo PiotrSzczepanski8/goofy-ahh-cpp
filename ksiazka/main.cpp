@@ -7,7 +7,7 @@ using namespace std;
 
 struct Entry{
     string name;
-    string phone;
+    string adress;
 };
 
 class AddressBook{
@@ -32,13 +32,13 @@ public:
             cout << "nieprawidlowy index" << endl;
             return;
         }
-        cout << "nazwa: " << entries[index].name << "\n" << "telefon: " << entries[index].phone << "\n";
+        cout << "nazwa: " << entries[index].name << "\n" << "adres: " << entries[index].adress << "\n";
     }
 
     void saveToFile(const string& filename) const{
         ofstream ofs(filename);
         for (const auto& e : entries){
-            ofs << e.name << '\n' << e.phone << '\n';
+            ofs << e.name << '\n' << e.adress << '\n';
         }
         cout << "zapisano pozycje do: " << filename << endl;
     }
@@ -46,9 +46,9 @@ public:
     void loadFromFile(const string& filename){
         ifstream ifs(filename);
         entries.clear();
-        string name, phone;
-        while (getline(ifs, name) && getline(ifs, phone)){
-            entries.push_back({name, phone});
+        string name, adress;
+        while (getline(ifs, name) && getline(ifs, adress)){
+            entries.push_back({name, adress});
         }
         cout << "odczytano pozycje z: " << filename << endl;
     }
@@ -70,20 +70,22 @@ int main(){
             case 1:{
                 Entry e;
                 cout << "nazwa: "; getline(cin, e.name);
-                cout << "telefon: "; getline(cin, e.phone);
+                cout << "adres: "; getline(cin, e.adress);
                 book.addEntry(e);
                 break;
             }
             case 2:{
                 int idx;
-                cout << "podaj index (zaczynajac od 0), zeby usunac pozycje: "; cin >> idx;
+                cout << "podaj index (zaczynajac od 0), zeby usunac pozycje: "; 
+                cin >> idx;
                 cin.ignore();
                 book.deleteEntry(idx);
                 break;
             }
             case 3:{
                 int idx;
-                cout << "podaj index (zaczynajac od 0), zeby zobaczyc pozycje: "; cin >> idx;
+                cout << "podaj index (zaczynajac od 0), zeby zobaczyc pozycje: "; 
+                cin >> idx;
                 cin.ignore();
                 book.showEntry(idx);
                 break;
