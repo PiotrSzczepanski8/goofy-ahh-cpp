@@ -230,7 +230,7 @@ int Board::checkUncovered(){
             }
         }
     }
-    return uncovered;
+    return (rows * columns) - uncovered;
 }
 
 void Board::showEmptyFields(int x, int y){
@@ -279,7 +279,7 @@ void Board::showBoard(){
         }
         for(int j = 0;j<rows;++j){
             if(board[i][j].marked == true){
-                cout << "# ";
+                cout << "\033[31m# \033[0m";
             }
             else if(board[i][j].hidden == true){
                     cout << "■ ";
@@ -402,7 +402,6 @@ int main(){
             }
         }
 
-        cout << "pola zakryte: " << potencjal;
         if(wygrana == potencjal){
             cout << "wygrales" << endl;
         }
